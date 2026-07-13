@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .graph-container {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-top: 40px;
+    }
+    .graph-box {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      width: 45%;
+      min-width: 300px;
+      text-align: center;
+    }
+    .dashboard-header {
+      margin-top: 30px;
+    }
+    .dashboard-boxes {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      margin: 40px auto;
+      max-width: 1200px;
+      gap: 20px;
+    }
+    .dashboard-box {
+      flex: 1 1 calc(25% - 20px);
+      color: black;
+      padding: 30px;
+      text-align: center;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      font-size: 1.1rem;
+    }
+    .table-wrapper {
+      margin: 40px auto;
+      max-width: 95%;
+    }
+    .table-responsive {
+      max-height: 450px;
+      overflow-y: auto;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .small-path {
+      max-width: 160px;
+      word-break: break-all;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="container mt-3">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#">PoacherGuard Admin</a>
+      <div class="ms-auto d-flex">
+        <a href="{{ url_for('admin_home') }}" class="btn btn-outline-light me-3">Dashboard</a>
+        <a href="{{ url_for('view_users') }}" class="btn btn-outline-light me-3">View Users</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-light">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Dashboard Header -->
+  <div class="container dashboard-header text-center">
+    <h1 class="mt-4">Welcome, Admin!</h1>
+    <p class="lead">Monitor poacher detections and system activity at a glance.</p>
+  </div>
+
+  <!-- Summary Boxes -->
+  <div class="dashboard-boxes">
+
+    <div class="dashboard-box" style="background-color:#b9f6ca;">
+      <h4>🚨 Total Poacher Detections</h4>
+      <p><strong>{{ detections | map(attribute='poacher_count') | sum }}</strong></p>
+    </div>
+
+    <div class="dashboard-box" style="background-color:#fff9c4;">
+      <h4>✉️ Email Alerts Sent</h4>
+      <p><strong>{{ detections | selectattr('email_sent') | list | length }}</strong></p>
+    </div>
+
+    <div class="dashboard-box" style="background-color:#bbdefb;">
+      <h4>🎥 Live & Mobile Sessions</h4>
+      <p><strong>
+        {{ detections | selectattr('source_type','equalto','live') | list | length
+        +
+        detections | selectattr('source_type','equalto','mobile') | list | length }}
+      </strong></p>
+    </div>
+
+    <div class="dashboard-box" style="background-color:#ffe0b2;">
+      <h4>⏱ Last Activity</h4>
+      <p><strong>
+        {% if detections %}
+          {{ detections[0].started_at.strftime("%d-%m-%Y %H:%M") }}
+        {% else %} - {% endif %}
+      </strong></p>
+    </div>
+
+  </div>
+
+  <!-- Detection History -->
+  <div class="table-wrapper">
+    <h3 class="text-center mb-3">Detection History</h3>
+
+    <div class="table-responsive p-3">
+      <table class="table table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Source</th>
+            <th>Result</th>
+            <th>Poachers</th>
+            <th>Email</th>
+            <th>Started</th>
+            <th>Ended</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for d in detections %}
+            {% set screenshots = d.screenshot_paths.split(',') if d.screenshot_paths else [] %}
+
+            <tr>
+              <td>{{ d.id }}</td>
+
+              <!-- Source Type Badge -->
+              <td>
+                {% if d.source_type == 'image' %}
+                  <span class="badge bg-primary">Image</span>
+                {% elif d.source_type == 'video' %}
+                  <span class="badge bg-success">Video</span>
+                {% elif d.source_type == 'live' %}
+                  <span class="badge bg-warning text-dark">Live</span>
+                {% elif d.source_type == 'mobile' %}
+                  <span class="badge bg-info text-dark">Mobile</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ d.source_type }}</span>
+                {% endif %}
+              </td>
+
+              <!-- Screenshots -->
+              <td>
+                  {% if d.output_path %}
+    {# Normalize Windows path and extract part after static/results/ #}
+    {% set norm = d.output_path.replace('\\', '/') %}
+    {% set rel = norm.split('static/results/')[-1] %}
+    <a href="{{ url_for('static', filename='results/' ~ rel) }}"
+       target="_blank"
+       class="btn btn-sm btn-primary">
+      View
+    </a>
+  {% else %}
+    -
+  {% endif %}
+              </td>
+
+              <!-- Poacher Count -->
+              <td>
+                {% if d.poacher_count > 0 %}
+                  <span class="badge bg-danger">{{ d.poacher_count }}</span>
+                {% else %}
+                  <span class="badge bg-secondary">0</span>
+                {% endif %}
+              </td>
+
+              <!-- Email -->
+              <td>
+                {% if d.email_sent %}
+                  <span class="badge bg-success">Yes</span>
+                {% else %}
+                  <span class="badge bg-secondary">No</span>
+                {% endif %}
+              </td>
+
+              <td>{{ d.started_at.strftime("%d-%m-%Y %H:%M") }}</td>
+              <td>{{ d.ended_at.strftime("%d-%m-%Y %H:%M") }}</td>
+            </tr>
+
+          {% else %}
+            <tr>
+              <td colspan="9" class="text-center py-4">No detection records found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

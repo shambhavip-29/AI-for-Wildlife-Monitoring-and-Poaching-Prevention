@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>AI for Wildlife Monitoring and Poaching.
+    </title>
+    <link href="/static/css/main.css" rel="stylesheet">
+
+    <style>
+        .content {
+            max-width: 500px;
+            margin: auto;
+        }
+
+        .bg-img {
+            width: 100%;
+            height: 100vh;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.71), rgba(0, 0, 0, 0.7)), url('static/images/bengal_tiger.png');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+
+</head>
+<body style="background: linear-gradient(130deg, black, #228B22);
+      color: #fff;
+      height: 100vh;">
+<nav>
+    <ul class="footer-links">
+        <li><a href="/user_home">Home</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</nav>
+
+
+<div class="bg-img">
+    <div class="content"><br>
+
+        <div class="index-main"><br><br><br><br>
+
+
+             {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                  <div class="flash-messages">
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              {% endwith %}
+
+            <div style="width : 100%; padding-top : 5%;">
+                <div class="header-content">
+                    <a href="/predict_image">
+                        <button>Image Selection</button>
+                    </a>
+                </div>
+            </div>
+            <br><br>
+            <div style="width : 100%; padding-top : 5%;">
+                <div class="header-content">
+                    <a href="/predict_video">
+                        <button>Video Selection</button>
+                    </a>
+                </div>
+            </div>
+            <br><br>
+            <div style="width : 100%; padding-top : 5%;">
+                <div class="header-content">
+                    <a href="/predict_camera">
+                        <button>Open Camera</button>
+                    </a>
+                </div>
+            </div>
+            <br><br>
+            <div style="width : 100%; padding-top : 5%;">
+                <div class="header-content">
+                    <a href="/predict_mobile_camera">
+                        <button>Mobile Camera</button>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
