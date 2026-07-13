@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+
+# Database
+instance/
+*.db
+
+# Uploads & Generated Files
+uploads/
+static/results/
+
+# Environment Variables
+.env
+
+# Logs
+*.log
