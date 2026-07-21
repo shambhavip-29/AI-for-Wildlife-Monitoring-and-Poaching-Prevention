@@ -13,4 +13,3 @@ Pillow
 email-validator
 SQLAlchemy
 twilio
-playsound==1.3.0

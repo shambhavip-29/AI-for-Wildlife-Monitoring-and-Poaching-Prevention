@@ -743,7 +743,7 @@ def show_image_result(filename):
 # ===========================================================
 
 from datetime import datetime
-from playsound import playsound  # simple library to play audio
+# from playsound import playsound  # simple library to play audio
 import cv2, os, threading
 
 
