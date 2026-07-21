@@ -403,10 +403,14 @@ def about():
 # =====================================================
 
 from ultralytics import YOLO
-import os
 
-# Load YOLOv8 model
-model = YOLO("best.pt")
+model = None
+
+def get_model():
+    global model
+    if model is None:
+        model = YOLO("best.pt")
+    return model
 
 # Folder Configuration
 UPLOAD_FOLDER = "uploads"
@@ -512,7 +516,7 @@ def predict_video():
         screenshot_dir = os.path.join(RESULTS_FOLDER, "video_screenshots")
         os.makedirs(screenshot_dir, exist_ok=True)
 
-        results = model.predict(
+        results = get_model().predict(
             source=filepath,
             save=True,
             project=RESULTS_FOLDER,
@@ -550,12 +554,12 @@ def predict_video():
                 cooldown_counter -= 1
                 continue
 
-            frame_results = model.predict(frame, conf=0.5, verbose=False)
+            frame_results = get_model().predict(frame, conf=0.5, verbose=False)
             annotated_frame = frame_results[0].plot()
 
             for box in frame_results[0].boxes:
                 cls_id = int(box.cls[0])
-                label = model.names[cls_id]
+                label = get_model().names[cls_id]
                 label_lower = label.lower()
                 detected_labels_set.add(label_lower)   # 👈 NEW
 
@@ -671,7 +675,7 @@ def predict_image():
         filepath = os.path.join(UPLOAD_FOLDER, image.filename)
         image.save(filepath)
 
-        results = model.predict(
+        results = get_model().predict(
             source=filepath,
             save=True,
             project=RESULTS_FOLDER,
@@ -695,7 +699,7 @@ def predict_image():
         detected_labels = []
         for box in results[0].boxes:
             cls_id = int(box.cls[0])
-            detected_labels.append(model.names[cls_id].lower())
+            detected_labels.append(get_model().names[cls_id].lower())
 
         is_poacher = "poacher" in detected_labels
         email_sent = False
