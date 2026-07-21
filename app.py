@@ -826,7 +826,7 @@ def predict_camera():
     import cv2
     import os
     import threading
-    import tkinter as tk
+    #import tkinter as tk
     from tkinter import messagebox
     from PIL import Image, ImageTk
     from datetime import datetime
@@ -984,10 +984,10 @@ from flask import Flask, redirect, url_for, flash
 import cv2
 import threading
 import os
-import tkinter as tk
-from PIL import Image, ImageTk
-from datetime import datetime
-from playsound import playsound
+#import tkinter as tk
+#from PIL import Image, ImageTk
+#from datetime import datetime
+#from playsound import playsound
 #from flask_login import LoginManager
 
 
